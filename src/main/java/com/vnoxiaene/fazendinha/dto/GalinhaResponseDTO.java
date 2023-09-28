@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GalinhaResponseDTO {
 
-    private UUID uuid;
-    private String nome;
-    private String dataNascimento;
+  private UUID uuid;
+  private String nome;
+  private String dataNascimento;
 }

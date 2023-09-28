@@ -29,103 +29,105 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ExtendWith(MockitoExtension.class)
 class GalinhaControllerTest {
 
-    @Mock
-    GalinhaService galinhaService;
-    @InjectMocks
-    GalinhaController galinhaController;
+  @Mock
+  GalinhaService galinhaService;
+  @InjectMocks
+  GalinhaController galinhaController;
 
-    MockedStatic<UUID> uuidMockedStatic;
-    UUID uuid = UUID.fromString("4a28b57c-d564-4077-a8bc-1a8d0648ec2c");
-    @BeforeEach
-    void setUp() {
-        uuidMockedStatic = Mockito.mockStatic(UUID.class, InvocationOnMock::callRealMethod);
-        uuidMockedStatic.when(UUID::randomUUID).thenReturn(uuid);
-    }
+  MockedStatic<UUID> uuidMockedStatic;
+  UUID uuid = UUID.fromString("4a28b57c-d564-4077-a8bc-1a8d0648ec2c");
 
-    @AfterEach
-    void tearDown() {
-        uuidMockedStatic.close();
-    }
+  @BeforeEach
+  void setUp() {
+    uuidMockedStatic = Mockito.mockStatic(UUID.class, InvocationOnMock::callRealMethod);
+    uuidMockedStatic.when(UUID::randomUUID).thenReturn(uuid);
+  }
 
-    @Test
-    @DisplayName("Retornar galinha quando request valida")
-    void retornaGalinhaQuandoRequestValida() throws Exception {
-        //given
-        var jsonResponse = "{\"uuid\":\"4a28b57c-d564-4077-a8bc-1a8d0648ec2c\",\"nome\":\"pititica\",\"dataNascimento\":\"2023-08-01\"}";
-        var pititica = GalinhaRequestDTO.builder()
-                .setNome("pititica")
-                .setDataNascimento("2023-08-01")
-                .build();
-        var responseDTO = GalinhaResponseDTO.builder()
-                .setUuid(uuid)
-                .setNome("pititica")
-                .setDataNascimento("2023-08-01")
-                .build();
-        BDDMockito.given(galinhaService.cadastrar(pititica)).willReturn(responseDTO);
+  @AfterEach
+  void tearDown() {
+    uuidMockedStatic.close();
+  }
 
-        // ----------------------------------------------------------------------
+  @Test
+  @DisplayName("Retornar galinha quando request valida")
+  void retornaGalinhaQuandoRequestValida() throws Exception {
+    //given
+    var jsonResponse = "{\"uuid\":\"4a28b57c-d564-4077-a8bc-1a8d0648ec2c\",\"nome\":\"pititica\",\"dataNascimento\":\"2023-08-01\"}";
+    var pititica = GalinhaRequestDTO.builder()
+        .setNome("pititica")
+        .setDataNascimento("2023-08-01")
+        .build();
+    var responseDTO = GalinhaResponseDTO.builder()
+        .setUuid(uuid)
+        .setNome("pititica")
+        .setDataNascimento("2023-08-01")
+        .build();
+    BDDMockito.given(galinhaService.cadastrar(pititica)).willReturn(responseDTO);
 
-        String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
-        //when
-        MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
-                MockMvcRequestBuilders.post("/v1/galinha")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(conteudo);
-        //then
-        MockMvcBuilders.standaloneSetup(galinhaController)
-                .build()
-                .perform(mockHttpServletRequestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string(jsonResponse));
+    // ----------------------------------------------------------------------
 
-    }
-    @Test
-    @DisplayName("Retornar bad request quando request esta sem nome")
-    void retornaBadRequestQuandoRequestSemNome() throws Exception {
-        //given
-       var pititica = GalinhaRequestDTO.builder()
-                .setDataNascimento("2023-08-01")
-                .build();
+    String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
+    //when
+    MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
+        MockMvcRequestBuilders.post("/v1/galinha")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(conteudo);
+    //then
+    MockMvcBuilders.standaloneSetup(galinhaController)
+        .build()
+        .perform(mockHttpServletRequestBuilder)
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+        .andExpect(MockMvcResultMatchers.content().string(jsonResponse));
 
-        // ----------------------------------------------------------------------
+  }
 
-        String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
-        //when
-        MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
-                MockMvcRequestBuilders.post("/v1/galinha")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(conteudo);
-        //then
-        MockMvcBuilders.standaloneSetup(galinhaController)
-                .build()
-                .perform(mockHttpServletRequestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
+  @Test
+  @DisplayName("Retornar bad request quando request esta sem nome")
+  void retornaBadRequestQuandoRequestSemNome() throws Exception {
+    //given
+    var pititica = GalinhaRequestDTO.builder()
+        .setDataNascimento("2023-08-01")
+        .build();
 
-    @Disabled
-    @Test
-    @DisplayName("Retornar bad request quando request data esta maior que hoje")
-    void retornaBadRequestQuandoRequestTemDataMaiorQueHoje() throws Exception {
-        //given
-       var pititica = GalinhaRequestDTO.builder()
-                .setNome("pititica")
-                .setDataNascimento(LocalDate.now().plusDays(1l).toString())
-                .build();
-        Mockito.doThrow(InvalidDataNascimentoException.class).when(galinhaService).cadastrar(pititica);
-        // ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
-        String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
-        //when
-        MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
-                MockMvcRequestBuilders.post("/v1/galinha")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(conteudo);
-        //then
-        MockMvcBuilders.standaloneSetup(galinhaController)
-                .build()
-                .perform(mockHttpServletRequestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
+    String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
+    //when
+    MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
+        MockMvcRequestBuilders.post("/v1/galinha")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(conteudo);
+    //then
+    MockMvcBuilders.standaloneSetup(galinhaController)
+        .build()
+        .perform(mockHttpServletRequestBuilder)
+        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+  }
+
+  @Disabled
+  @Test
+  @DisplayName("Retornar bad request quando request data esta maior que hoje")
+  void retornaBadRequestQuandoRequestTemDataMaiorQueHoje() throws Exception {
+    //given
+    var pititica = GalinhaRequestDTO.builder()
+        .setNome("pititica")
+        .setDataNascimento(LocalDate.now().plusDays(1L).toString())
+        .build();
+    Mockito.doThrow(InvalidDataNascimentoException.class).when(galinhaService).cadastrar(pititica);
+    // ----------------------------------------------------------------------
+
+    String conteudo = (new ObjectMapper()).writeValueAsString(pititica);
+    //when
+    MockHttpServletRequestBuilder mockHttpServletRequestBuilder =
+        MockMvcRequestBuilders.post("/v1/galinha")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(conteudo);
+    //then
+    MockMvcBuilders.standaloneSetup(galinhaController)
+        .build()
+        .perform(mockHttpServletRequestBuilder)
+        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+  }
 
 }

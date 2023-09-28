@@ -10,9 +10,10 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class GalinhaControllerAdviceHandler {
 
-    @ExceptionHandler(value = {InvalidDataNascimentoException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String invalidDataNascimentoException(InvalidDataNascimentoException invalidDataNascimentoException, WebRequest request){
-        return invalidDataNascimentoException.getMessage();
-    }
+  @ExceptionHandler(value = {InvalidDataNascimentoException.class})
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public String invalidDataNascimentoException(
+      InvalidDataNascimentoException invalidDataNascimentoException, WebRequest request) {
+    return invalidDataNascimentoException.getMessage();
+  }
 }

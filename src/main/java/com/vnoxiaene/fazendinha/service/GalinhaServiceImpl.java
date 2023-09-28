@@ -18,62 +18,64 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class GalinhaServiceImpl implements GalinhaService {
 
-    private final GalinhaRepository galinhaRepository;
-    @Override
-    public GalinhaResponseDTO cadastrar(GalinhaRequestDTO galinhaRequestDTO) {
-        log.info("Cadastrando galinha: {}", galinhaRequestDTO);
-        Galinha galinha = getGalinha(galinhaRequestDTO);
-        Galinha galinhaDB = galinhaRepository.save(galinha);
-        return getGalinhaResponseDTO(galinhaDB);
-    }
+  private final GalinhaRepository galinhaRepository;
 
-    private static Galinha getGalinha(GalinhaRequestDTO galinhaRequestDTO) {
-        Galinha galinha = new Galinha();
-        galinha.setUuid(UUID.randomUUID());
-        galinha.setNome(galinhaRequestDTO.getNome());
-        galinha.setDataNascimento(parseStringToLocalDate(galinhaRequestDTO));
-        return galinha;
-    }
+  @Override
+  public GalinhaResponseDTO cadastrar(GalinhaRequestDTO galinhaRequestDTO) {
+    log.info("Cadastrando galinha: {}", galinhaRequestDTO);
+    Galinha galinha = getGalinha(galinhaRequestDTO);
+    Galinha galinhaDB = galinhaRepository.save(galinha);
+    return getGalinhaResponseDTO(galinhaDB);
+  }
 
-    private static GalinhaResponseDTO getGalinhaResponseDTO(Galinha galinhaDB) {
-        GalinhaResponseDTO galinhaResponseDTO = new GalinhaResponseDTO();
-        galinhaResponseDTO.setUuid(galinhaDB.getUuid());
-        galinhaResponseDTO.setNome(galinhaDB.getNome());
-        galinhaResponseDTO.setDataNascimento(galinhaDB.getDataNascimento().toString());
-        return galinhaResponseDTO;
-    }
+  private static Galinha getGalinha(GalinhaRequestDTO galinhaRequestDTO) {
+    Galinha galinha = new Galinha();
+    galinha.setUuid(UUID.randomUUID());
+    galinha.setNome(galinhaRequestDTO.getNome());
+    galinha.setDataNascimento(parseStringToLocalDate(galinhaRequestDTO));
+    return galinha;
+  }
 
-    @Override
-    public GalinhaResponseDTO get(UUID uuid) {
-        return getGalinhaResponseDTO( galinhaRepository.findByUuid(uuid));
-    }
+  private static GalinhaResponseDTO getGalinhaResponseDTO(Galinha galinhaDB) {
+    GalinhaResponseDTO galinhaResponseDTO = new GalinhaResponseDTO();
+    galinhaResponseDTO.setUuid(galinhaDB.getUuid());
+    galinhaResponseDTO.setNome(galinhaDB.getNome());
+    galinhaResponseDTO.setDataNascimento(galinhaDB.getDataNascimento().toString());
+    return galinhaResponseDTO;
+  }
 
-    @Override
-    public void deletar(UUID uuid) {
-        Galinha galinha = galinhaRepository.findByUuid(uuid);
-        galinhaRepository.delete(galinha);
-    }
+  @Override
+  public GalinhaResponseDTO get(UUID uuid) {
+    return getGalinhaResponseDTO(galinhaRepository.findByUuid(uuid));
+  }
 
-    @Override
-    public GalinhaResponseDTO alterar(UUID uuid, GalinhaRequestDTO galinhaRequestDTO) {
-        Galinha galinha = galinhaRepository.findByUuid(uuid);
-        galinha.setNome(galinha.getNome());
-        galinha.setDataNascimento(parseStringToLocalDate(galinhaRequestDTO));
-        Galinha savedGalinha = galinhaRepository.save(galinha);
-        return getGalinhaResponseDTO(savedGalinha);
-    }
+  @Override
+  public void deletar(UUID uuid) {
+    Galinha galinha = galinhaRepository.findByUuid(uuid);
+    galinhaRepository.delete(galinha);
+  }
 
-    @Override
-    public List<GalinhaResponseDTO> listarGalinhas() {
-        List<Galinha> galinhas = galinhaRepository.findAll();
-        return galinhas.stream().map(GalinhaServiceImpl::getGalinhaResponseDTO).collect(Collectors.toList());
-    }
+  @Override
+  public GalinhaResponseDTO alterar(UUID uuid, GalinhaRequestDTO galinhaRequestDTO) {
+    Galinha galinha = galinhaRepository.findByUuid(uuid);
+    galinha.setNome(galinha.getNome());
+    galinha.setDataNascimento(parseStringToLocalDate(galinhaRequestDTO));
+    Galinha savedGalinha = galinhaRepository.save(galinha);
+    return getGalinhaResponseDTO(savedGalinha);
+  }
 
-    private static LocalDate parseStringToLocalDate(GalinhaRequestDTO galinhaRequestDTO) {
-        LocalDate parse = LocalDate.parse(galinhaRequestDTO.getDataNascimento());
-        if(parse.isAfter(LocalDate.now())){
-            throw new InvalidDataNascimentoException("data nascimento invalida");
-        }
-        return parse;
+  @Override
+  public List<GalinhaResponseDTO> listarGalinhas() {
+    List<Galinha> galinhas = galinhaRepository.findAll();
+    return galinhas.stream().map(GalinhaServiceImpl::getGalinhaResponseDTO)
+        .collect(Collectors.toList());
+  }
+
+  private static LocalDate parseStringToLocalDate(GalinhaRequestDTO galinhaRequestDTO) {
+    LocalDate parse = LocalDate.parse(galinhaRequestDTO.getDataNascimento());
+    if (parse.isAfter(LocalDate.now())) {
+      throw new InvalidDataNascimentoException("data nascimento invalida");
     }
+    return parse;
+  }
 }
