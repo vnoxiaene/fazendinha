@@ -3,15 +3,15 @@ package com.vnoxiaene.fazendinha.service;
 import com.vnoxiaene.fazendinha.dto.GalinhaRequestDTO;
 import com.vnoxiaene.fazendinha.dto.GalinhaResponseDTO;
 import com.vnoxiaene.fazendinha.entity.Galinha;
+import com.vnoxiaene.fazendinha.exception.InvalidDataNascimentoException;
 import com.vnoxiaene.fazendinha.repository.GalinhaRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +22,17 @@ public class GalinhaServiceImpl implements GalinhaService {
     @Override
     public GalinhaResponseDTO cadastrar(GalinhaRequestDTO galinhaRequestDTO) {
         log.info("Cadastrando galinha: {}", galinhaRequestDTO);
+        Galinha galinha = getGalinha(galinhaRequestDTO);
+        Galinha galinhaDB = galinhaRepository.save(galinha);
+        return getGalinhaResponseDTO(galinhaDB);
+    }
+
+    private static Galinha getGalinha(GalinhaRequestDTO galinhaRequestDTO) {
         Galinha galinha = new Galinha();
         galinha.setUuid(UUID.randomUUID());
         galinha.setNome(galinhaRequestDTO.getNome());
         galinha.setDataNascimento(parseStringToLocalDate(galinhaRequestDTO));
-        Galinha galinhaDB = galinhaRepository.save(galinha);
-        return getGalinhaResponseDTO(galinhaDB);
+        return galinha;
     }
 
     private static GalinhaResponseDTO getGalinhaResponseDTO(Galinha galinhaDB) {
@@ -65,6 +70,10 @@ public class GalinhaServiceImpl implements GalinhaService {
     }
 
     private static LocalDate parseStringToLocalDate(GalinhaRequestDTO galinhaRequestDTO) {
-        return LocalDate.parse(galinhaRequestDTO.getDataNascimento());
+        LocalDate parse = LocalDate.parse(galinhaRequestDTO.getDataNascimento());
+        if(parse.isAfter(LocalDate.now())){
+            throw new InvalidDataNascimentoException("data nascimento invalida");
+        }
+        return parse;
     }
 }
