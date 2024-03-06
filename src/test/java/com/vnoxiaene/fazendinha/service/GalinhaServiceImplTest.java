@@ -33,7 +33,7 @@ class GalinhaServiceImplTest {
                 .setNome("pititica")
                 .build();
         Galinha galinha = new Galinha();
-        UUID uuid = UUID.fromString("4a28b57c-d564-4077-a8bc-1a8d0648ec2c");
+        UUID uuid = UUID.fromString("4a28b57c-d564-4077-a8bc-1a8d0648ec2d");
         galinha.setNome(pititica.getNome());
         galinha.setUuid(uuid);
         galinha.setDataNascimento(LocalDate.parse(pititica.getDataNascimento()));
